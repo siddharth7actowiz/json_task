@@ -3,7 +3,7 @@ from datetime import *
 import re
 structured_data = dict()
 #raw json file path
-raw_json = "D:\\Siddharth\\JSON\\input_zomato_data.json"
+raw_json = "input_zomato_data.json"
 
 #filename for structured_json
 f_name="ZOMATO"
@@ -23,7 +23,7 @@ def read_json(raw_json):
 #function to parse raw__dict and return structured dict
 def json_parser(raw_dict):
         
-        
+        #Restro
         base_index=raw_dict.get("page_info")
         structured_data["restaurant_id"]=base_index.get("resId")
         structured_data["restaurant_name"]=base_index.get("ogTitle")
@@ -36,20 +36,21 @@ def json_parser(raw_dict):
         structured_data["fssai_licence_number"]=match.group()
        
        
-        
        
         structured_data["address_info"]={
              "full_address":common_index.get("address"),
              "region":common_index.get("locality_verbose"),
+             
              "city":common_index.get("city_name"),
              "pincode":common_index.get("zipcode"),
 
              "state":"Gujrat"
              }
-        
+        #region 
+        old_reg=structured_data["address_info"]["region"]
+        structured_data["address_info"]["region"]=old_reg.replace(old_reg,"Ambali").strip()
 
 
-       
 
         structured_data["cuisines"]=[
              {"name":i.get("name"),
@@ -68,30 +69,23 @@ def json_parser(raw_dict):
 
         close_time=common_path2.split()[-1]
         
-        
        
         
         structured_data["timings"]={
             
             day:{"open":open_time,"close":close_time}
             for day in days
-            
-
-            
+                      
         }
              
-    
-       
-       
-
-
+        
         store=[]
         for i in raw_dict["page_data"]["order"]["menuList"]["menus"]:
             
             for j in i["menu"]["categories"]:
                 temp_dict=dict()
                 #if category name is not avilable we have fallback to menu name
-                temp_dict["category_name"] = (j.get("category", {}).get("name")or i.get("menu", {}).get("name"))
+                temp_dict["category_name"] = (j.get("category", {}).get("name") or i.get("menu", {}).get("name"))
                 temp_dict['items'] = [
                 {
                     
@@ -111,18 +105,15 @@ def json_parser(raw_dict):
 
 
 
-
-
 #function for structured_json
 def export_structured_data_func(res):
     with open(file_name,"w") as file:
          file.write(json.dumps(res))
     
 
-
-
 # Function call to load jsion 
 raw_dict = read_json(raw_json)
+
 
 #Function Call to Parse Json
 res=json_parser(raw_dict)
